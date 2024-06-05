@@ -2,8 +2,13 @@ import express from "express";
 import configViewEngine from "./configs/viewEngnine";
 import initWebRoutes from "./routes/web";
 require("dotenv").config();
-
+import bodyParser from 'body-parser';
+// const app = express();
 const app = express();
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+
 const PORT = process.env.PORT || 8080;
 //config view engine
 configViewEngine(app);

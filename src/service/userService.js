@@ -2,6 +2,8 @@
 import mysql from 'mysql2/promise';
 import bcrypt from 'bcryptjs';
 import bluebird from 'bluebird';
+import db from '../models';
+import user from '../models/user';
 const salt = bcrypt.genSaltSync(10);
 
 // Create the connection to database
@@ -15,74 +17,55 @@ const hashPassword = (userPassword) => {
 }
 const createNewUser = async (email, username, password) => {
     let hashPass = hashPassword(password);
-    const connection = await mysql.createConnection({
-        host: 'localhost',
-        user: 'root',
-        database: 'jwt',
-        Promise: bluebird
-    });
+
     try {
-        const [rows, fields] = await connection.execute('INSERT INTO users(email,username,password) VALUES (?,?,?)', [email, username, hashPass]);
-        return rows;
+        await db.User.create({
+            username: username,
+            email: email,
+            password: hashPass
+        })
     } catch (err) {
         console.log('Error in example usage:', err);
     }
 }
 const getUserList = async () => {
-    const connection = await mysql.createConnection({
-        host: 'localhost',
-        user: 'root',
-        database: 'jwt',
-        Promise: bluebird
-    });
+    let users = [];
     try {
-        const [rows, fields] = await connection.execute('SELECT * FROM users');
-        return rows;
+        users = await db.User.findAll();
+        return users;
     } catch (err) {
         console.log('Error in example usage:', err);
     }
 }
-const deleteUser = async (id) => {
-    const connection = await mysql.createConnection({
-        host: 'localhost',
-        user: 'root',
-        database: 'jwt',
-        Promise: bluebird
-    });
+const deleteUser = async (userid) => {
+
     try {
-        const [rows, fields] = await connection.execute('DELETE FROM users WHERE id=?', [id]);
-        return rows;
+        await db.User.destroy({
+            where: { id: userid }
+        })
     } catch (error) {
         console.log('Error in example usage:', error);
     }
 }
 const getUserByID = async (id) => {
-    const connection = await mysql.createConnection({
-        host: 'localhost',
-        user: 'root',
-        database: 'jwt',
-        Promise: bluebird
+    let user = {};
+    user = await db.User.findOne({
+        where: { id: id }
     });
-    try {
-        const [rows, fields] = await connection.execute('SELECT * FROM users WHERE id=?', [id]);
-        return rows;
-    } catch (error) {
-        console.log('Error in example usage:', error);
-    }
+    //console.log(">>> check user findone: ", user);
+    return user.get({ plain: true });
+
 }
 const updateUserInfo = async (email, username, id) => {
-    const connection = await mysql.createConnection({
-        host: 'localhost',
-        user: 'root',
-        database: 'jwt',
-        Promise: bluebird
-    });
-    try {
-        const [rows, fields] = await connection.execute('UPDATE users SET email = ?, username = ? WHERE id=?', [email, username, id]);
-        return rows;
-    } catch (error) {
-        console.log('Error in example usage:', error);
-    }
+    await db.User.update(
+        { email: email, username: username },
+        {
+            where: {
+                id: id,
+            },
+        },
+    );
+
 }
 module.exports = {
     createNewUser,

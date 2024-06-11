@@ -29,6 +29,12 @@ const createNewUser = async (email, username, password) => {
     }
 }
 const getUserList = async () => {
+    // test relationship
+    // let newUser = await db.User.findAll(
+    //     { include: db.Group }
+    // );
+
+    // console.log(">>>> check newUser: ", newUser);
     let users = [];
     try {
         users = await db.User.findAll();
